@@ -1,4 +1,5 @@
-require('dotenv').config(); // Utiliza variables de entorno desde un archivo .env
+require('dotenv').config({ path: '../../.env' }); // Ajusta la ruta si es necesario
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
 const sequelize = require('./config/db.config'); // Configuración de la base de datos
 const express = require('express');
 const bodyParser = require('body-parser'); // Middleware para parsear el cuerpo de las peticiones

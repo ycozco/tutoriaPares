@@ -1,32 +1,31 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const User = require('../models/user.model'); // Asegúrate de que la ruta sea la correcta
+const User = require('../models/user.model'); // Verifica que esta sea la ruta correcta a tu modelo de usuario
 
+// Función para manejar el inicio de sesión de un usuario
 exports.loginUser = async (req, res) => {
-  // Obtén el username y la contraseña desde el cuerpo de la petición
   const { username, password } = req.body;
   console.log('Intento de inicio de sesión para el usuario:', username);
 
   try {
-    // Busca el usuario por su username
     const user = await User.findOne({ where: { username } });
     console.log('Usuario encontrado:', user ? user.username : 'No encontrado');
 
-    // Si no se encuentra el usuario, devuelve un error
     if (!user) {
       return res.status(401).json({ message: 'Usuario no encontrado o credenciales incorrectas' });
     }
 
-    // Comparar la contraseña proporcionada por el usuario con el hash almacenado
+    // Imprimir contraseñas para depuración (eliminar en producción)
+    console.log('Contraseña proporcionada:', password);
+    console.log('Contraseña almacenada (hash):', user.password);
+
     const isMatch = await bcrypt.compare(password, user.password);
     console.log('La contraseña coincide:', isMatch);
 
-    // Si la contraseña no coincide, devuelve un error
     if (!isMatch) {
       return res.status(401).json({ message: 'Contraseña incorrecta' });
     }
 
-    // Si la contraseña coincide, genera un token JWT
     const token = jwt.sign(
       { id: user.id, tipo: user.tipo },
       process.env.JWT_SECRET,
@@ -34,7 +33,6 @@ exports.loginUser = async (req, res) => {
     );
     console.log('Token generado:', token);
 
-    // Envía el token y la información del usuario como respuesta
     res.json({
       message: 'Inicio de sesión exitoso',
       user: {
@@ -48,5 +46,35 @@ exports.loginUser = async (req, res) => {
   } catch (error) {
     console.error('Error en el inicio de sesión:', error);
     res.status(500).json({ message: 'Error del servidor al intentar iniciar sesión' });
+  }
+};
+
+// Función para manejar el registro de un nuevo usuario
+// src/controllers/auth.controller.js
+// ... (otros requires)
+
+exports.register = async (req, res) => {
+  try {
+    // Asumiendo que también estás recibiendo el 'email' en la petición,
+    // de lo contrario, deberás quitarlo del objeto de creación.
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const newUser = await User.create({
+      username: req.body.username,
+      // Elimina la línea de abajo si tu modelo no tiene una columna de 'email'
+      // email: req.body.email,
+      password: hashedPassword,
+      tipo: req.body.tipo
+    });
+
+    res.status(201).json({
+      message: 'Usuario registrado con éxito',
+      userId: newUser.id
+    });
+  } catch (error) {
+    console.error('Error al registrar el usuario:', error);
+    res.status(500).json({
+      message: 'Error al registrar el usuario',
+      error: error.message
+    });
   }
 };
