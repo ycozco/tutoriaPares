@@ -1,9 +1,14 @@
+// src/components/LoginForm.js
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
-import { UserContext } from '../context/UserContext';
+import { AuthContext } from '../context/AuthContext'; // Cambia UserContext por AuthContext
+
+import { useNavigate } from 'react-router-dom'; // Importa useNavigate
+
 
 const LoginForm = () => {
-  const { setUser } = useContext(UserContext);
+  const navigate = useNavigate(); // Inicializa useNavigate
+  const { login } = useContext(AuthContext); // Utiliza el método login de tu AuthContext
   const [credentials, setCredentials] = useState({
     username: '',
     password: ''
@@ -20,9 +25,11 @@ const LoginForm = () => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:3000/api/auth/login', credentials);
-      setUser(response.data); // Suponiendo que la respuesta incluya los datos del usuario
+      login(response.data.user, response.data.token); // Guarda los datos del usuario y el token
+      navigate('/profile'); // Redirige al perfil del usuario
     } catch (error) {
       console.error('Error de inicio de sesión', error);
+      // Aquí puedes manejar errores, como mostrar un mensaje al usuario
     }
   };
 

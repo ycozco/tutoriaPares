@@ -1,17 +1,20 @@
+// src/utils/RequireAuth.js
 import React, { useContext } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { UserContext } from '../context/UserContext';
+import { AuthContext } from '../context/AuthContext';
 
 const RequireAuth = ({ children }) => {
-  const { user } = useContext(UserContext);
+  const { auth } = useContext(AuthContext);
   let location = useLocation();
 
-  if (!user) {
-    // Redirigir al usuario a la página de inicio de sesión, pero guarda la ubicación actual a la que intentaban acceder.
+  if (!auth) {
+    // Redirige a la página de login, pero recuerda la ubicación actual
+    // que el usuario intentó visitar. Después de iniciar sesión, puedes
+    // redirigir al usuario a esta ubicación utilizando el estado en la ruta de navegación.
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return children; // Si el usuario está autenticado, renderiza el componente children.
+  return children;
 };
 
 export default RequireAuth;

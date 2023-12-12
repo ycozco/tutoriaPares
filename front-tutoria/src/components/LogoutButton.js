@@ -1,14 +1,16 @@
+// LogoutButton.js
 import React, { useContext } from 'react';
-import { UserContext } from '../context/UserContext';
+import { AuthContext } from '../context/AuthContext'; // Cambia UserContext por AuthContext
+import { useNavigate } from 'react-router-dom'; // Importa useNavigate
 
 const LogoutButton = () => {
-  const { setUser } = useContext(UserContext);
+  const navigate = useNavigate(); // Inicializa useNavigate
+  const { setAuth } = useContext(AuthContext); // Cambia setUser por setAuth
 
   const handleLogout = () => {
-    // Limpiar el estado y el almacenamiento local
-    setUser(null);
-    localStorage.removeItem('user');
-    // Redirigir a la página de inicio de sesión
+    setAuth(null); // Actualiza el estado de autenticación
+    localStorage.removeItem('user'); // Limpia el almacenamiento local
+    navigate('/login'); // Redirige a la página de inicio de sesión
   };
 
   return <button onClick={handleLogout}>Cerrar Sesión</button>;
